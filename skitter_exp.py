@@ -9,7 +9,6 @@ import json
 import pandas as pd
 from tqdm import tqdm
 import numpy as np
-import time
 
 
 def encode_graph_file():
