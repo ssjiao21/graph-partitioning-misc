@@ -9,86 +9,6 @@ import json
 import pandas as pd
 from tqdm import tqdm
 import numpy as np
-import time
-from sklearn.cluster import SpectralClustering
-
-
-def build_grapth():
-    ids = []
-    edges = []
-    fnames = [fn for fn in os.listdir('gplus') if 'edges' in fn]
-    for i, fn in enumerate(fnames):
-        print('{}/{}: {}'.format(i+1, len(fnames), fn))
-        with open(osp.join('gplus', fn), 'r') as f:
-            lines = f.readlines()
-            if len(lines) == 0:
-                continue
-            series = pd.Series(lines)
-            series = series.str.rstrip('\n')
-            series = series.str.split()
-            edges_ = list(series)
-
-            ids_ = np.array(edges_).reshape([-1])
-            ids_ = list(set(list(ids_)))
-
-            ids += ids_
-            edges += edges_
-
-    ids = list(set(list(ids)))
-    # edges = list(set(list(edges)))
-    print('Number of nodes:', len(ids))
-    print('Number of edges:', len(edges))  # contains duplicates
-    # print(ids)
-    # print(edges)
-
-    id2idx = {}
-    for i, id in tqdm(enumerate(ids)):
-        id2idx[id] = str(i)
-    with open('id2idx.json', 'w') as f:
-        json.dump(id2idx, f)
-
-    N = len(ids)
-    A = np.zeros((N, N))
-    for e in tqdm(edges):
-        i = int(id2idx[e[0]])
-        j = int(id2idx[e[1]])
-        A[i, j] = 1
-        A[j, i] = 1
-    np.save('Affinity.npy', A)
-
-
-def clustering():
-    with open('id2idx.json', 'r') as f:
-        id2idx = json.load(f)
-    ts = time.time()
-    A = np.load('Affinity.npy')
-    print('Time elapsed: {}s'.format(time.time() - ts))
-    A = A.astype(np.uint8)
-
-    N_C = 100
-    N_SAMPLE = 100000
-    A = A[:N_SAMPLE, :N_SAMPLE]
-    print(A.shape)
-
-    clustering = SpectralClustering(n_clusters=N_C, assign_labels="discretize", affinity="precomputed", random_state=0)
-    ts = time.time()
-    clustering.fit(A)
-    print('Time elapsed: {}s'.format(time.time() - ts))
-    print(clustering.labels_[:100])
-
-    cluster = {}
-    for id in id2idx.keys():
-        idx = int(id2idx[id])
-        if idx < N_SAMPLE:
-            cluster[id] = float(clustering.labels_[idx])
-    with open('cluster.json', 'w') as f:
-        json.dump(cluster, f)
-
-    cluster_vol = {}
-    for c in range(N_C):
-        where = np.where(np.array(clustering.labels_) == c)[0]
-        cluster_vol[c] = len(where)
-    print(cluster_vol)
 
 
 def encode_graph_file():
@@ -191,8 +111,5 @@ def evaluate_partitioning():
 
 
 if __name__ == '__main__':
-    # build_grapth()
-    # clustering()
-
     # encode_graph_file()
     evaluate_partitioning()

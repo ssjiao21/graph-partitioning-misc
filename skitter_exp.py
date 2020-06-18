@@ -15,15 +15,14 @@ import time
 def encode_graph_file():
     with open('as-skitter.txt', 'r') as f:
         lines = f.readlines()
-        series = pd.Series(lines)
-        series = series.str.rstrip('\n')[5:]
-        series = series.str.split()
-        edges = list(series)
+    series = pd.Series(lines)
+    series = series.str.rstrip('\n')[5:]
+    series = series.str.split()
+    edges = list(series)
 
-        ids = np.array(edges).reshape([-1])
-        ids = list(set(list(ids)))
-
+    ids = np.array(edges).reshape([-1])
     ids = list(set(list(ids)))
+
     n_nodes = len(ids)
 
     id2num = {}
